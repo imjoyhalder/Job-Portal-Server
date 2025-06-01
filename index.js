@@ -52,8 +52,8 @@ async function run() {
       for (const application of result) {
         const query1 = { _id: new ObjectId(application.job_id) }
         const job = await jobsCollection.findOne(query1)
-        if(job){
-          application.title = job.title, 
+        if (job) {
+          application.title = job.title,
           application.company = job.company
           application.company_logo = job.company_logo
           application.location = job.location
@@ -66,6 +66,12 @@ async function run() {
     app.post('/job-applications', async (req, res) => {
       const application = req.body;
       const result = await jobApplicationCollection.insertOne(application)
+      res.send(result)
+    })
+
+    app.post('/job-post', async (req, res) => {
+      const application = req.body;
+      const result = await jobsCollection.insertOne(application)
       res.send(result)
     })
 
