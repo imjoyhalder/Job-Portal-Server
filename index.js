@@ -29,7 +29,13 @@ async function run() {
     const jobApplicationCollection = await client.db('Job-Portal').collection('job_applications')
 
     app.get('/jobs', async (req, res) => {
-      const cursor = jobsCollection.find()
+      const email = req.query?.email
+      let query = {}
+      if (email) {
+        query = {hr_email : email}
+      }
+
+      const cursor = jobsCollection.find(query)
       const result = await cursor.toArray()
       res.send(result)
     })
@@ -54,7 +60,7 @@ async function run() {
         const job = await jobsCollection.findOne(query1)
         if (job) {
           application.title = job.title,
-          application.company = job.company
+            application.company = job.company
           application.company_logo = job.company_logo
           application.location = job.location
         }
