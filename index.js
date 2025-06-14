@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
@@ -32,7 +33,7 @@ async function run() {
       const email = req.query?.email
       let query = {}
       if (email) {
-        query = {hr_email : email}
+        query = { hr_email: email }
       }
 
       const cursor = jobsCollection.find(query)
@@ -47,8 +48,16 @@ async function run() {
       res.send(result)
     })
 
-    // job application apis
 
+    //Auth Related APIs
+    app.post('/jwt', async (req, res) => {
+      const user = req.body
+      const token = jwt.sign(user, process.env.JWT_SECRET , { expiresIn: '1h' })
+      res.send(token)
+    })
+
+
+    // job application apis
     app.get('/job-application', async (req, res) => {
       const email = req.query.email;
       const query = { applicant_email: email }
@@ -78,6 +87,30 @@ async function run() {
     app.post('/job-post', async (req, res) => {
       const application = req.body;
       const result = await jobsCollection.insertOne(application)
+
+
+
+      const id = application.job_id
+      const query = { _id: new ObjectId(id) }
+
+      const job = await jobsCollection.findOne(query)
+      let count = 0;
+      if (job.applicationCount) {
+        newCount = job.applicationCount + 1;
+      }
+      else {
+        count = 1;
+      }
+
+      const filter = { _id: new ObjectId(id) }
+      const updatedDoc = {
+        $set: {
+          applicationCount: newCount
+        }
+      }
+
+      const updateResult = await jobsCollection.updateOne(filter, updatedDoc)
+
       res.send(result)
     })
 
