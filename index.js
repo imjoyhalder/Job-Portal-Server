@@ -10,7 +10,7 @@ const app = express()
 const port = process.env.PORT || 3000
 
 app.use(cors({
-  origin: ['http://localhost:5173'], 
+  origin: ['http://localhost:5173'],
   credentials: true
 }))
 app.use(express.json())
@@ -56,16 +56,24 @@ async function run() {
 
 
     //Auth Related APIs
+
+    // app.post('/jwt', async (req, res) => {
+    //   const user = req.body
+    //   const token = jwt.sign(user, process.env.JWT_SECRET , { expiresIn: '1h' })
+    //   res.cookie('token', token, {
+    //     httpOnly: true, 
+    //     secure: false, 
+    //   })
+    //   .send({success: true, token})
+    // })
+
     app.post('/jwt', async (req, res) => {
       const user = req.body
-      const token = jwt.sign(user, process.env.JWT_SECRET , { expiresIn: '1h' })
-      res.cookie('token', token, {
-        httpOnly: true, 
-        secure: false, 
-      })
-      .send({success: true})
+      const token = jwt.sign(user, 'secret', { expiresIn: '1h' })
+      console.log(token)
+      res.send(token)
     })
-    
+
 
 
     // job application apis
