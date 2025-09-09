@@ -53,8 +53,8 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
 
-    const jobsCollection = await client.db('Job-Portal').collection('jobs')
-    const jobApplicationCollection = await client.db('Job-Portal').collection('job_applications')
+    const jobsCollection = client.db('Job-Portal').collection('jobs');
+    const jobApplicationCollection = client.db('Job-Portal').collection('job_applications');
 
     app.get('/jobs', logger, async (req, res) => {
       console.log('now inside the api callback')
@@ -98,7 +98,7 @@ async function run() {
       const query = { applicant_email: email }
 
       if (req.user.email !== req.query.email) {
-        return res.status(403).send({message: 'forbidden access'})
+        return res.status(403).send({ message: 'forbidden access' })
       }
 
 
