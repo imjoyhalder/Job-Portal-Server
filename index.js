@@ -6,7 +6,7 @@ require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 5000
 
 app.use(cors({
   origin: ['http://localhost:5173'],
@@ -15,10 +15,7 @@ app.use(cors({
 app.use(express.json())
 app.use(cookieParser())
 
-const logger = (req, res, next) => {
-  console.log('Inside the logger')
-  next()
-}
+
 
 const verifyToken = (req, res, next) => {
   console.log("Inside Verify Token Middleware ", req.cookies)
@@ -56,7 +53,33 @@ async function run() {
     const jobsCollection = client.db('Job-Portal').collection('jobs');
     const jobApplicationCollection = client.db('Job-Portal').collection('job_applications');
 
-    app.get('/jobs', logger, async (req, res) => {
+
+
+    //-------------Auth (JWT) related API----------
+
+    app.post('/jwt', async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '12h' })
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: false
+        // secure: process.env.NODE_ENV === "production",
+        // sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      })
+        .send({ success: true })
+    })
+
+    app.post('/logout', (req, res) => {
+      res.clearCookie('token', {
+        httpOnly: true,
+        secure: false,
+        // secure: process.env.NODE_ENV === 'production'
+      })
+        .send({ success: true })
+    })
+
+    //---- Job Related API---------------
+    app.get('/jobs', async (req, res) => {
       console.log('now inside the api callback')
       const email = req.query?.email
       let query = {}
@@ -75,21 +98,6 @@ async function run() {
       const result = await jobsCollection.findOne(query)
       res.send(result)
     })
-
-
-    //-----------------Auth Related APIs JWT ----------------------
-
-    app.post('/jwt', async (req, res) => {
-
-      const user = req.body;
-      const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '5h' })
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: false
-      })
-        .send({ success: true })
-    })
-
 
 
     // job application apis
