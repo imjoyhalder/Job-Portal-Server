@@ -78,9 +78,11 @@ async function run() {
         .send({ success: true })
     })
 
+
+
     //---- Job Related API---------------
+
     app.get('/jobs', async (req, res) => {
-      console.log('now inside the api callback')
       const email = req.query?.email
       let query = {}
       if (email) {
@@ -88,6 +90,19 @@ async function run() {
       }
 
       const cursor = jobsCollection.find(query)
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
+    // get limited job for home page 
+    app.get('/jobs-limit', async (req, res) => {
+      const email = req.query?.email
+      let query = {}
+      if (email) {
+        query = { hr_email: email }
+      }
+
+      const cursor = jobsCollection.find(query).limit(12)
       const result = await cursor.toArray()
       res.send(result)
     })
